@@ -738,10 +738,8 @@ int main(int argc, char *argv[])
 	int pWrap[ndims];				// which parameters to have periodic boundary conditions?
 	for(int i = 0; i < ndims; i++) pWrap[i] = 0;
 	
-  char root[100] = "output_aistats-";			// root for output files
+  char root[100] = "output_RoCELL-";			// root for output files
 
-  //sprintf(root, "chains/model_selection/rev/weak_%.e/my_posterior-", SPIKE_B31);
-	
 	int seed = -1;					// random no. generator seed, if < 0 then take the seed from system clock
 	
 	int fb = 1;					// need feedback on standard output?
