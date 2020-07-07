@@ -23,5 +23,5 @@ Download the software from GitHub with the following command:
 
 Build the MultiNest nested sampling program and RoCELL by simply running `make` in the root directory. It is likely that some compiler flags will have to be set individually, so that the C++ compiler, e.g., [gcc](https://gcc.gnu.org/), can find the required headers and libraries.
 
-
+To verify that the software has been built successfully, one can use the provided script by running `bash ./run_IV_example.sh` in a Linux or Windows PowerShell terminal. 
 
