@@ -23,9 +23,9 @@ inline double log_spike_and_slab_scale_free(double x, double w, double k_slab = 
   
   assert(("Slab precision smaller than spike precision", k_slab <= k_spike));
   
-  if (w == 0) {
+  if (w == 1) { // only slab
     return - 0.5 * (k_slab * x * x + log(2 * M_PI) - log(k_slab));
-  } else if (w == 1) {
+  } else if (w == 0) { // only spike
     return - 0.5 * (k_spike * x * x + log(2 * M_PI) - log(k_spike));
   }
   
