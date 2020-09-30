@@ -2,25 +2,15 @@
 #define ROCELL_H
 
 #include <armadillo>
-// #include <eigen3/Eigen/Dense>
-// #include <eigen3/Eigen/Cholesky>
+#include <assert.h>
 
-//' Compute 
-//'
+
 //' @author Ioan Gabriel Bucur
 arma::vec log_likelihood_gradient_scale_free(
     arma::mat sncsm, unsigned N, double sb21, double sb31, double sb32, 
     double sc24, double sc34, double v1, double v2, double v3);
 
-//'
-//' @param sncsm Scaled non-centered scatter matrix.
-//' @param N Number of observations.
-//'
-//' @return 
-//' 
 //' @author Ioan Gabriel Bucur
-//' 
-//' @examples
 arma::mat log_likelihood_hessian_scale_free(
     arma::mat sncsm, unsigned N, double sb21, double sb31, double sb32, 
     double sc24, double sc34, double v1, double v2, double v3);
@@ -29,13 +19,19 @@ arma::mat log_likelihood_hessian_scale_free_confounders(
     arma::mat sncsm, unsigned N, double b21, double b31, double b32,
     double sc24, double sc34, double v1, double v2, double v3);
 
-inline double log_spike_and_slab_scale_free(double x, double w, double slab_precision = 1, double spike_precision = 100) {
+inline double log_spike_and_slab_scale_free(double x, double w, double k_slab = 1, double k_spike = 100) {
   
-  double var_slab = 1 / slab_precision;
-  double var_spike = 1 / spike_precision;
+  assert(("Slab precision smaller than spike precision", k_slab <= k_spike));
   
-  return log(w * exp(-(x * x) / (2 * var_slab)) / sqrt(2 * M_PI * var_slab) + 
-             (1 - w) * exp(-(x * x) / (2 * var_spike)) / sqrt(2 * M_PI * var_spike));
+  if (w == 0) {
+    return - 0.5 * (k_slab * x * x + log(2 * M_PI) - log(k_slab));
+  } else if (w == 1) {
+    return - 0.5 * (k_spike * x * x + log(2 * M_PI) - log(k_spike));
+  }
+  
+  // We factor out the slab part to improve numerical stability when both precisions are large
+  return -0.5 * (k_slab * x * x + log(2 * M_PI)) + 
+    log(w * sqrt(k_slab) + (1 - w) * sqrt(k_spike) * exp(- 0.5 * (k_spike - k_slab) * x * x));
 }
 
 inline double log_spike_and_slab(double alpha, double vtail, double varrow, double beta = 0.5, double k1 = 1, double k2 = 1e2) {
