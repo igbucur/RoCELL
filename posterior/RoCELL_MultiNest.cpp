@@ -6,6 +6,8 @@
 #include "multinest.h"
 #include "RoCELL.h"
 
+#include <assert.h>
+
 #include <boost/math/distributions/normal.hpp>
 boost::math::normal dist(0.0, 1.0);
 
@@ -596,7 +598,43 @@ void LogLike(double *Cube, int &ndim, int &npars, double &lnew, void *context)
   // Read scaled confounding coefficients, which are N(0, 1) distributed.
   double sc24 = quantile(dist, Cube[0]);
   double sc34 = quantile(dist, Cube[1]);
+  
+  
+  // TODO: Improve model handling
+  double w32 = -1;
+  if (config->model == 0) w32 = 1;
+  else if (config->model == 1) w32 = 0;
+  else if (config->model == 2) w32 = 0.5;
+  
+  /**
+   * Get scale-free result
+   */
+  
+  arma::vec spar = get_params_scale_free(config->covariance, sc24, sc34);
+  
+  
+  arma::mat sf_hess = log_likelihood_hessian_scale_free(config->covariance, 1, spar[0], spar[1], spar[2], sc24, sc34, spar[3], spar[4], spar[5]);
 
+  arma::mat sf_negHessReduced(6, 6);
+  
+  sf_negHessReduced.submat(0, 0, 2, 2) = - sf_hess.submat(0, 0, 2, 2);
+  sf_negHessReduced.submat(3, 0, 5, 2) = - sf_hess.submat(5, 0, 7, 2);
+  sf_negHessReduced.submat(0, 3, 2, 5) = - sf_hess.submat(0, 5, 2, 7);
+  sf_negHessReduced.submat(3, 3, 5, 5) = - sf_hess.submat(5, 5, 7, 7);
+  
+  double sf_ld = 0;
+  arma::mat L = chol(sf_negHessReduced, "lower");
+  for (unsigned i = 0; i < L.n_rows; ++i) sf_ld += log(L(i,i));
+
+  double sf_result = - sf_ld +
+    log_spike_and_slab_scale_free(spar[0], 0.5, config->slab_precision, config->spike_precision) +
+    log_spike_and_slab_scale_free(spar[1], 0.5, config->slab_precision, config->spike_precision) +
+    log_spike_and_slab_scale_free(spar[2], w32, config->slab_precision, config->spike_precision) +
+    (- log(spar[3]) - log(spar[4]) - log(spar[5]));
+
+  /*
+   * Same thing, but in the original scale.
+   */
 
   arma::vec AV = get_params(config->covariance, sc24, sc34);
   
@@ -616,23 +654,28 @@ void LogLike(double *Cube, int &ndim, int &npars, double &lnew, void *context)
   // std::cout << hess << std::endl;
   // std::cout << negHessReduced << std::endl;
 
+
   double ld = 0;
   arma::mat U = chol(negHessReduced, "lower");
   for (unsigned i = 0; i < U.n_rows; ++i)
     ld += log(U(i,i));
   ld *= 2;
   
-  // TODO: Improve model handling
-  double w32 = -1;
-  if (config->model == 0) w32 = 1;
-  else if (config->model == 1) w32 = 0;
-  else if (config->model == 2) w32 = 0.5;
 
-  lnew = - ld / 2 +
+
+
+  double result = - ld / 2 +
     log_spike_and_slab(AV[0], AV[3], AV[4], 0.5, config->slab_precision, config->spike_precision) +
     log_spike_and_slab(AV[1], AV[3], AV[5], 0.5, config->slab_precision, config->spike_precision) +
     log_spike_and_slab(AV[2], AV[4], AV[5], w32, config->slab_precision, config->spike_precision) +
     (- log(AV[3]) - log(AV[4]) - log(AV[5])); //+
+  
+  std::cout << "New result: " << sf_result << std::endl;
+  std::cout << "Old result: " << result << std::endl;
+  
+  assert(("New boss, same as the old boss", abs(sf_result - result) < 1e-10));
+  
+  lnew = result;
 }
 
 /***********************************************************************************************************************/

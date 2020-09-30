@@ -1,4 +1,4 @@
-MINGW_DIR = /c/rtools40/mingw64
+MINGW_DIR = /c/msys64/mingw64
 MULTINEST_DIR = ../MultiNest/MultiNest_v3.12
 
 FC = gfortran
@@ -11,7 +11,7 @@ LAPACKLIB = -llapack -lblas
 
 
 # CPPLIBS = $(shell mpic++ --showme:link)
-LIBS = -L$(MULTINEST_DIR) -lnest3 -llapack -lstdc++ -lblas # $(shell mpif90 --showme:link) 
+LIBS = -L$(MULTINEST_DIR) -lnest3 -larmadillo -llapack -lstdc++ -lblas # $(shell mpif90 --showme:link) 
 # LIBS =  -L$(MULTINEST_DIR) -lnest3 $(LAPACKLIB) -lstdc++
  
 OBJFILES = RoCELL.o RoCELL_MultiNest.o

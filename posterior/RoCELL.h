@@ -12,16 +12,11 @@ arma::vec log_likelihood_gradient_scale_free(
     arma::mat sncsm, unsigned N, double sb21, double sb31, double sb32, 
     double sc24, double sc34, double v1, double v2, double v3);
 
-//' Difference between two given timezones at a specified date.
-//'
-//' Time zone offsets vary by date, and this helper function computes
-//' the difference (in hours) between two time zones for a given date time.
 //'
 //' @param sncsm Scaled non-centered scatter matrix.
 //' @param N Number of observations.
 //'
-//' @return A numeric value with the difference (in hours) between the first and
-//' second time zone at the given date
+//' @return 
 //' 
 //' @author Ioan Gabriel Bucur
 //' 
@@ -34,6 +29,15 @@ arma::mat log_likelihood_hessian_scale_free_confounders(
     arma::mat sncsm, unsigned N, double b21, double b31, double b32,
     double sc24, double sc34, double v1, double v2, double v3);
 
+inline double log_spike_and_slab_scale_free(double x, double w, double slab_precision = 1, double spike_precision = 100) {
+  
+  double var_slab = 1 / slab_precision;
+  double var_spike = 1 / spike_precision;
+  
+  return log(w * exp(-(x * x) / (2 * var_slab)) / sqrt(2 * M_PI * var_slab) + 
+             (1 - w) * exp(-(x * x) / (2 * var_spike)) / sqrt(2 * M_PI * var_spike));
+}
+
 inline double log_spike_and_slab(double alpha, double vtail, double varrow, double beta = 0.5, double k1 = 1, double k2 = 1e2) {
   
   double var1 = varrow / vtail / k1;
@@ -44,9 +48,10 @@ inline double log_spike_and_slab(double alpha, double vtail, double varrow, doub
   return log(beta * exp(-(alpha * alpha) / (2 * var1)) / sqrt(2 * M_PI * var1) + (1 - beta) * exp(-(alpha * alpha) / (2 * var2)) / sqrt(2 * M_PI * var2));
 }
 
-//' Function that returns model covariance matrix given hidden and observed parameter values.
+//' Function that returns 3x3 model covariance matrix given hidden and observed parameter values.
 //' 
 //' @param b21 
+//' @param b31
 inline arma::mat get_covariance_matrix(double b21, double b31, double b32, double c24, double c34, double v1, double v2, double v3, double v4) {
   arma::mat Sigma(3, 3);
   
@@ -95,10 +100,36 @@ inline arma::vec get_params(arma::mat Sigma, double sc24, double sc34) {
   return AV;
 }
 
-// 
-// NumericVector logLikelihoodObservedGradientVarianceScaleFree(
-//     NumericMatrix sncsm, int N, 
-//     double b12, double b13, double b23, double c24, double c34,
-//     double v1, double v2, double v3)
+inline arma::vec get_params_scale_free(arma::mat Sigma, double sc24, double sc34) {
+  
+  // scale-free Omega (I + \tilde{C}\tilde{C}^T)
+  arma::mat sOmega(3, 3, arma::fill::zeros);
+  // scale-free parameters
+  arma::vec spar(6, arma::fill::zeros);
+  
+  sOmega(0, 0) = 1;
+  sOmega(1, 1) = 1 + sc24 * sc24;
+  sOmega(1, 2) = sOmega(2, 1) = sc24 * sc34;
+  sOmega(2, 2) = 1 + sc34 * sc34;
+  
+  arma::mat Q = arma::chol(Sigma, "lower");
+  arma::mat L = arma::chol(sOmega, "lower"); 
+  
+  arma::vec sqV = arma::diagvec(Q * L.i());
+  
+  arma::mat I(3, 3, arma::fill::eye);
+  
+  // scale-free B matrix (\tilde{B})
+  arma::mat sB = I - L * Q.i() * arma::diagmat(sqV);
+  
+  spar[0] = sB(1, 0);
+  spar[1] = sB(2, 0);
+  spar[2] = sB(2, 1);
+  spar[3] = sqV[0] * sqV[0];
+  spar[4] = sqV[1] * sqV[1];
+  spar[5] = sqV[2] * sqV[2];
+  
+  return spar;
+}
 
 #endif // ROCELL_H
