@@ -141,7 +141,7 @@ plot_posterior_grid_contour <- function(filename = 'figures/posterior_grid_conto
   
   grid_values <- apply(grid_conf, 1, function(row) {
     # at the ML solution, Sigma == Sigma_hat
-    log_posterior_ML_manifold_scale_free(row[1], row[2], Sigma, samples = 1, k_slab = 1, k_spike = 1e3)
+    log_posterior_ML_manifold(row[1], row[2], Sigma, N = 1, k_slab = 1, k_spike = 1e3)
   })
   
   # Derive curve where sb31 == 0 at the ML solution
