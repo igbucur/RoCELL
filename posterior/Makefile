@@ -1,3 +1,5 @@
+MULTINEST_DIR = ../MultiNest/MultiNest_v3.12
+
 FFLAGS += -ffree-line-length-none -O3 -I../src
 CFLAGS += -O3 -I$(MINGW_DIR)/include
 LDFLAGS += -L$(MINGW_DIR)/lib 

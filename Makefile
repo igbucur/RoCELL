@@ -27,7 +27,7 @@ MULTINEST_DIR = MultiNest/Multinest_v3.12
 export CC FC AR LD
 
 
-all: check
+default: build 
 
 build: build_MultiNest build_RoCELL
 	$(R_EXEC) CMD build .
@@ -37,12 +37,7 @@ clean: clean_RoCELL clean_MultiNest
 check: build
 	R CMD check --no-manual $(PKGNAME)_$(PKGVERS).tar.gz
 
-install_deps:
-	Rscript.exe \
-	-e 'if (!requireNamespace("remotes")) install.packages("remotes")' \
-	-e 'remotes::install_deps(dependencies = TRUE)'
-
-install: install_deps build
+install: build
 	$(R_EXEC) CMD INSTALL $(PKGNAME)_$(PKGVERS).tar.gz
 
 clean: clean_MultiNest clean_RoCELL
