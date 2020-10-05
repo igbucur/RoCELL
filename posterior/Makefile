@@ -14,7 +14,7 @@ LAPACKLIB = -llapack -lblas
 LIBS = -L$(MULTINEST_DIR) -lnest3 -larmadillo -llapack -lstdc++ -lblas # $(shell mpif90 --showme:link) 
 # LIBS =  -L$(MULTINEST_DIR) -lnest3 $(LAPACKLIB) -lstdc++
  
-OBJFILES = RoCELL.o RoCELL_MultiNest.o
+OBJFILES = RoCELL_MultiNest.o
 
 
 default: RoCELL
