@@ -129,17 +129,21 @@ read_MultiNest_samples <- function(filename, Sigma_hat) {
   
   samples <- utils::read.table(filename)
   
+  # extract MultiNest sample weights
   weights <- samples[, 1]
   
-  mcmc_B <- sapply(samples[, c(3, 4)], function(sc) stats::qnorm(sc))
+  # extract samples for confounding coefficients
+  mcmc_conf <- sapply(samples[, c(3, 4)], function(sc) stats::qnorm(sc))
   
-  mcmc_A <- t(apply(mcmc_B, 1, function(sc) {
+  # extract values for parameters on observable variables
+  mcmc_obs <- t(apply(mcmc_conf, 1, function(sc) {
     params <- get_ML_parameters_scale_free_confounders(Sigma_hat, sc[1], sc[2])
     c(params$B[3, 1], params$B[3, 2], params$V[2, 2], params$V[3, 3])
   }))
   
-  mcmc_samples <- coda::mcmc(cbind(mcmc_A, mcmc_B, samples[, 1]))
-  colnames(mcmc_samples) <- c('b31', 'b32', 'v2', 'v3', 'sc24', 'sc34', 'w')
+  # add MultiNest weights for each sample
+  mcmc_samples <- coda::mcmc(cbind(mcmc_obs, weights))
+  colnames(mcmc_samples) <- c('b31', 'b32', 'v2', 'v3', 'w')
   
   mcmc_samples
 }
