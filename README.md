@@ -2,9 +2,11 @@
 The data set contains source code implementing the RoCELL algorithm, which is 
 described in the article titled "[Robust Causal Estimation in the Large-Sample
 Limit without Strict Faithfulness](http://proceedings.mlr.press/v54/bucur17a.html)" 
-by Ioan Gabriel Bucur, Tom Claassen and Tom Heskes. This research is presented 
+by Ioan Gabriel Bucur, Tom Claassen and Tom Heskes. The data set also contains 
+simulated data necessary for exactly reproducing the figures in the article as
+well as the routines necessary for recreating it. This research is presented 
 in Chapter 2 of the PhD thesis titled "Being Bayesian about Causal Inference" by
-Ioan Gabriel Bucur.
+Ioan Gabriel Bucur. 
 
 The code is written in the R and C++ programming languages. RoCELL makes use of
 the [MultiNest](https://github.com/farhanferoz/MultiNest) nested sampling algorithm, 
