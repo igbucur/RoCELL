@@ -12,14 +12,24 @@ which is owned and copyrighted by Farhan Feroz and Mike Hobson. For more details
 please see the LICENCE accompanying the MultiNest submodule.
 
 The code is structured on the skeleton of an [R package](https://r-pkgs.org/index.html) 
-package as follows.
+package as follows:
 
-- The folder `data` contains pre-saved simulated data, which we use to.
-The simulated data can be reproduced using the 
+- The folder `data` contains pre-saved simulated data, which we use to recreate
+the figures from the article. The simulated data can also be reproduced using 
+the `aistats-article-figures.R` script in the main folder;
 
-- The folder `man` contains the documentation documentation f
-Implementation of the approach described in 
+- The folder `man` contains the documentation for the implemented functions;
 
+- The folder `MultiNest` contains the MultiNest submodule;
+
+- The folder `R` contains the R files necessary for reproducing the figures from
+the article;
+
+- The folder `posterior` contains the C++ implementation of RoCELL written for
+integration with MultiNest;
+
+- The folder `src` contains an Rcpp wrapper to the RoCELL implementation in
+`posterior`. The wrapper functions are called by `aistats-article-figures.R`.
 
 
 ## Prerequisites
@@ -49,6 +59,9 @@ A slightly more complicated but workable and native solution would be to employ
 the [MSYS2](https://www.msys2.org/) build platform. This setup involves installing
 packages (including necessary dependencies) from the MSYS2 collection: `pacman -S mingw-w64-x86_64-{armadillo|boost|gcc-fortran|hdf5|lapack|openblas}`.
 
+For installing and running the RoCELL R package, a few R packages are also 
+required. These are specified in the package `DESCRIPTION` file.
+
 
 ## Installation Instructions
 
@@ -64,7 +77,8 @@ of prerequisites must be specified separately. For example, if using
 one must add `-I/c/msys64/mingw64/include` to `CFLAGS` and `-L/c/msys64/mingw64/lib` 
 to `LDFLAGS` in the Makefile, assuming default installation directories.
 
-To verify that the software has been built successfully, one can use the provided 
+To verify that RoCELL has been built successfully, one can use the provided 
 script by running `bash ./run_IV_example.sh` in a Linux or Windows terminal
-(requires [GNU Bash](https://www.gnu.org/software/bash/)).
+(requires [GNU Bash](https://www.gnu.org/software/bash/)). To verify that the
+R package is installed successfully, run `Rscript ./aistats-article-figures.R`.
 
