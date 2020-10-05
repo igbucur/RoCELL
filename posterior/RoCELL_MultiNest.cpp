@@ -37,6 +37,7 @@ typedef struct {
 // lnew 						= loglikelihood
 
 
+//' MultiNest Log-Likelihood function (w.r.t. sc24, sc34)
 void LogLike(double *Cube, int &ndim, int &npars, double &lnew, void *context)
 {
   // Read Config structure
@@ -45,34 +46,12 @@ void LogLike(double *Cube, int &ndim, int &npars, double &lnew, void *context)
   // Read scaled confounding coefficients, which are N(0, 1) distributed.
   double sc24 = quantile(dist, Cube[0]);
   double sc34 = quantile(dist, Cube[1]);
-  
-  // TODO: Improve model handling
-  // double w32 = -1;
-  // if (config->model == 0) w32 = 1;
-  // else if (config->model == 1) w32 = 0;
-  // else if (config->model == 2) w32 = 0.5;
 
   // derive structural parameters and compute log-likelihood hessian
   arma::vec spar = get_params_scale_free(config->covariance, sc24, sc34);
-  arma::mat sf_hess = log_likelihood_hessian_scale_free(config->covariance, 1, spar[0], spar[1], spar[2], sc24, sc34, spar[3], spar[4], spar[5]);
 
-  // remove rows and columns corresponding to confounding coefficients
-  arma::mat sf_negHessReduced(6, 6);
-  sf_negHessReduced.submat(0, 0, 2, 2) = - sf_hess.submat(0, 0, 2, 2);
-  sf_negHessReduced.submat(3, 0, 5, 2) = - sf_hess.submat(5, 0, 7, 2);
-  sf_negHessReduced.submat(0, 3, 2, 5) = - sf_hess.submat(0, 5, 2, 7);
-  sf_negHessReduced.submat(3, 3, 5, 5) = - sf_hess.submat(5, 5, 7, 7);
-  
-  // compute log(sqrt(det(-H)))
-  double sf_ld = 0;
-  arma::mat L = chol(sf_negHessReduced, "lower");
-  for (unsigned i = 0; i < L.n_rows; ++i) sf_ld += log(L(i,i));
-
-  lnew = - sf_ld +
-    log_spike_and_slab_scale_free(spar[0], 0.5, config->slab_precision, config->spike_precision) +
-    log_spike_and_slab_scale_free(spar[1], 0.5, config->slab_precision, config->spike_precision) +
-    log_spike_and_slab_scale_free(spar[2], config->w32, config->slab_precision, config->spike_precision) +
-    (- log(spar[3]) - log(spar[4]) - log(spar[5]));
+  lnew = log_posterior_RoCELL(config->covariance, 1, spar[0], spar[1], spar[2], sc24, sc34, spar[3], spar[4], spar[5],
+                              config->slab_precision, config->spike_precision, config->w32);
 }
 
 /***********************************************************************************************************************/
@@ -225,6 +204,7 @@ int main(int argc, char *argv[])
     "\t-s33 (required)  Variance of X_3.\n"
     "\t-n               Number of live points. [1000] \n"
     "\t-o               Root of RoCELL output files. [output_RoCELL] \n"
+    "\t-e               MultiNest sampling efficiency. [0.8] \n"
     "\t-w               Spike-and-slab mixture weight for causal effect (sb32). [0.5] \n"
     "\t-slab            Precision of spike component. [1] \n"
     "\t-spike           Precision of spike component. [100] \n"
@@ -241,6 +221,11 @@ int main(int argc, char *argv[])
   
   if (exists_cmd_option(argv, argv + argc, "-o")) {
     sprintf(root, "%s-", get_cmd_option(argv, argv + argc, "-o"));
+  }
+  
+  if (exists_cmd_option(argv, argv + argc, "-e")) {
+    efr = strtod(get_cmd_option(argv, argv + argc, "-e"), NULL);
+    assert(("Sampling efficiency is between 0 and 1", (0 <= efr && efr <= 1)));
   }
   
   if (exists_cmd_option(argv, argv + argc, "-n")) {
@@ -322,17 +307,17 @@ int main(int argc, char *argv[])
 
 	void *context = &config;				// not required by MultiNest, any additional information user wants to pass
 
-	// 
+
 	// double C[2] = {0.5, 0.5};
 	// double ll = -1.0;
-	//  
+	// 
 	// LogLike(C, ndims, nPar, ll, context);
 	// std::cout << ll << std::endl;
 	// 
 	// C[0] = 0.25;
 	// LogLike(C, ndims, nPar, ll, context);
 	// std::cout << ll << std::endl;
-
+	// 
 	// std::exit(0);
 	
 	// calling MultiNest
