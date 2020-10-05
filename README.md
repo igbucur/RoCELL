@@ -11,6 +11,8 @@ the [MultiNest](https://github.com/farhanferoz/MultiNest) nested sampling algori
 which is owned and copyrighted by Farhan Feroz and Mike Hobson. For more details 
 please see the LICENCE accompanying the MultiNest submodule.
 
+## Structure
+
 The code is structured on the skeleton of an [R package](https://r-pkgs.org/index.html) 
 package as follows:
 
