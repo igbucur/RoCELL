@@ -178,7 +178,7 @@ read_MultiNest_log_evidence <- function(filename = "output_RoCELL-stats.dat") {
 #' the system command. MSYS2+MinGW has been tested and is recommended.
 #' @param ... Further shell parameters.
 #'
-#' @return See \link[base]{system} for Linux and \link[pkg]{shell} for Windows.
+#' @return See \link[base]{system} for Linux and \link[base]{shell} for Windows.
 #' @export
 #'
 #' @examples run_system_command("echo Hello!")

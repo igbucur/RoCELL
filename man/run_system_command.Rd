@@ -19,7 +19,7 @@ the system command. MSYS2+MinGW has been tested and is recommended.}
 \item{...}{Further shell parameters.}
 }
 \value{
-See \link[base]{system} for Linux and \link[pkg]{shell} for Windows.
+See \link[base]{system} for Linux and \link[base]{shell} for Windows.
 }
 \description{
 A more portable function for invoking a system command
