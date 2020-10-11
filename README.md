@@ -1,4 +1,22 @@
-# Description
+## Description
+In the era of big data, the increasing availability of huge data sets can
+paradoxically be harmful when our causal inference method is designed to search 
+for a causal model that is faithful to our data. Under the commonly made Causal 
+Faithfulness Assumption, we look for patterns of dependencies and independencies 
+in the data and match them with causal models that imply the same patterns.
+However, given enough data, we start picking up on the fact that everything is 
+ultimately connected. These interactions are not normally picked up in small samples.
+The only faithful causal model in the limit of a large number of samples 
+(the large-sample limit) therefore becomes the one where everything is connected. 
+Alas, we cannot extract any useful causal information from a completely connected 
+structure without making additional (strong) assumptions. We propose an alternative 
+approach (RoCELL) that replaces the Causal Faithfulness Assumption with a prior 
+that reflects the existence of many "weak" (irrelevant) and "strong" interactions.
+RoCELL outputs a posterior distribution over the target causal effect estimator
+that leads to good estimates even in the large-sample limit.
+
+## Content
+
 The data set contains source code implementing the RoCELL algorithm, which is 
 described in the article titled "[Robust Causal Estimation in the Large-Sample
 Limit without Strict Faithfulness](http://proceedings.mlr.press/v54/bucur17a.html)" 
@@ -10,8 +28,10 @@ Ioan Gabriel Bucur.
 
 The code is written in the R and C++ programming languages. RoCELL makes use of
 the [MultiNest](https://github.com/farhanferoz/MultiNest) nested sampling algorithm, 
-which is owned and copyrighted by Farhan Feroz and Mike Hobson. For more details 
-please see the LICENCE accompanying the MultiNest submodule.
+which is owned and copyrighted by Farhan Feroz and Mike Hobson. The MultiNest
+source code is bundled (as-is, except for build and install configuration) as a
+submodule in this package. For more details, please see the README accompanying 
+the MultiNest submodule.
 
 ## Structure
 
@@ -20,20 +40,36 @@ package as follows:
 
 - The folder `data` contains pre-saved simulated data, which we use to recreate
 the figures from the article. The simulated data can also be reproduced using 
-the `aistats-article-figures.R` script in the main folder;
+the `aistats-article-figures.R` script in the main folder. The simulated data
+sets are described in `R/data.R`.
 
-- The folder `man` contains the documentation for the implemented functions;
-
-- The folder `MultiNest` contains the MultiNest submodule;
+- The folder `MultiNest` contains the [MultiNest](https://github.com/farhanferoz/MultiNest)
+*submodule*, which is a fork of the project developed by Farhan Feroz and Mike Hobson.
+The MultiNest submodule implements a complex nested sampling algorithm, which we
+employ in RoCELL for estimating model evidences and producing posterior samples.
+The original implementation is kept unchanged, with the exception of changes
+in the build configuration file made for easier compilation and installation.
 
 - The folder `R` contains the R files necessary for reproducing the figures from
-the article;
+the article.
+
+- The folder `man` contains the documentation for the implemented functions.
 
 - The folder `posterior` contains the C++ implementation of RoCELL written for
-integration with MultiNest;
+integration with MultiNest.
 
 - The folder `src` contains an Rcpp wrapper to the RoCELL implementation in
 `posterior`. The wrapper functions are called by `aistats-article-figures.R`.
+
+- The folder `scripts` contains the script `aistats-article-figures.R`, which
+can be run from R to produce the figures in the AISTATS 2017 article and a
+basic script (`run_IV_example.sh`) for verifying that MultiNest was installed
+correctly.
+
+- The top folder also contains the following files:
+  - `DESCRIPTION` is the file describing the R package
+  - `NAMESPACE` is the file specifying the fucntions provided by the R package
+  - `LICENSE.md` is the file containing the GPL-3 license
 
 
 ## Prerequisites
@@ -82,9 +118,9 @@ one must add `-I/c/msys64/mingw64/include` to `CFLAGS` and `-L/c/msys64/mingw64/
 to `LDFLAGS` in the Makefile, assuming default installation directories.
 
 To verify that RoCELL has been built successfully, one can use the provided 
-script by running `bash ./run_IV_example.sh` in a Linux or Windows terminal
+script by running `bash scripts/run_IV_example.sh` in a Linux or Windows terminal
 (requires [GNU Bash](https://www.gnu.org/software/bash/)). To verify that the
-R package is installed successfully, run `Rscript ./aistats-article-figures.R`.
+R package is installed successfully, run `Rscript scripts/aistats-article-figures.R`.
 
 ## Licensing
 
